@@ -1,0 +1,138 @@
+﻿@using Nop.Web.Areas.Admin.Models.Questionnaire
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model QuestionnaireProductModel
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Catalog.Questionnaires").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Questionnaires");
+}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-6">
+            <nop-select asp-for="SelectedProductId" asp-items="@Model.ProductDDL" />
+        </div>
+        <div id="erroSection" class="col-6 d-none">
+            <nop-select asp-for="SelectedErrorId" asp-items="@Model.ErrorDDL" />
+        </div>
+    </div>
+    <div id="stepContent">
+        <div class="row">
+            <div class="col-12" id="title">
+            </div>
+        </div>
+        <div id="optionsGroup" class="d-none">
+            <div class="row">
+                <div class="col-6">
+                    <input name="optionss" id="yes" type="radio" value="Yes">@T("Common.Yes")
+                </div>
+                <div class="col-6">
+                    <input name="optionss" id="no" type="radio" value="No">@T("Common.No")
+                </div>
+            </div>
+            <button class="btn btn-success" id="showNextStep">@T("Forum.Submit")</button>
+        </div>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        var yesStepId = 0;
+        var noStepId = 0;
+        var nextStepId = 0;
+        $('#@Html.IdFor(model => model.SelectedProductId)').change(function () {
+            $('#erroSection').addClass('d-none');
+            $('#stepContent').addClass('d-none');
+            var selectedItem = parseInt($(this).val());
+            var ddlError = $('#@Html.IdFor(model => model.SelectedErrorId)');
+            $.ajax({
+                cache: false,
+                type: 'GET',
+                url: '@(Url.Action("GetErrorDDLByProductId", "Questionnaire"))',
+                data: {
+                    'productId': selectedItem
+                },
+                success: function (data, textStatus, jqXHR) {
+                    ddlError.html('');
+                    if (data.length > 1) {
+                        $('#erroSection').removeClass('d-none');
+                        $.each(data, function (id, option) {
+                            ddlError.append($('<option></option>').val(option.Value).html(option.Text));
+                        });
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $('#states-alert').click();
+                }
+            });
+        });
+        $('#@Html.IdFor(model => model.SelectedErrorId)').change(function () {
+            $('#stepContent').addClass('d-none');
+            var selectedItem = parseInt($(this).val());
+            var productId = parseInt($('#@Html.IdFor(model => model.SelectedProductId)').val());
+            $.ajax({
+                cache: false,
+                type: 'GET',
+                url: '@(Url.Action("GetStepByErrorId", "Questionnaire"))',
+                data: {
+                    'productId': productId,
+                    'errorId': selectedItem
+                },
+                success: function (data, textStatus, jqXHR) {
+                    $('#stepContent').removeClass('d-none');
+                    $('#title').text(data.Title)
+                    $("input:radio").prop('checked', false);
+                    if (data.YesId == null && data.NoId == null) {
+                        $('#optionsGroup').addClass('d-none');
+                    } else {
+                        yesStepId = data.YesId;
+                        noStepId = data.NoId;
+                        $('#optionsGroup').removeClass('d-none');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $('#states-alert').click();
+                }
+            });
+        });
+        $('#showNextStep').bind('click', function () {
+            var option = $("input[name='optionss']:checked").val();
+            if (option !== undefined) {
+                if (option == 'No') {
+                    nextStepId = noStepId;
+                } else {
+                    nextStepId = yesStepId;
+                }
+                var postData = {
+                    stepId: nextStepId
+                };
+                addAntiForgeryToken(postData);
+                $.ajax({
+                    cache: false,
+                    url: "@Url.Action("GetStepById", "Questionnaire")",
+                    type: "POST",
+                    data: postData,
+                    dataType: "json",
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(JSON.stringify(jqXHR));
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        $('#title').text(data.Title);
+                        $("input:radio").prop('checked', false);
+                        if (data.YesId == null && data.NoId == null) {
+                            $('#optionsGroup').addClass('d-none');
+                        } else {
+                            yesStepId = data.YesId;
+                            noStepId = data.NoId;
+                            $('#optionsGroup').removeClass('d-none');
+                        }
+                    }
+                });
+            } else {
+                alert('must select yes or no');
+            }
+        });
+    });
+</script>

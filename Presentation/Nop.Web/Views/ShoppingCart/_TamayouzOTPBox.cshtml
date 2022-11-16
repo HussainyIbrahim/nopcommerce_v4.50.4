@@ -1,0 +1,22 @@
+﻿@model ShoppingCartModel.TamayouzOTPBoxModel
+<div class="giftcard-box">
+    <div class="title">
+        <strong>@T("ShoppingCart.TamayouzOTP")</strong>
+    </div>
+    <div class="hint">@T("ShoppingCart.TamayouzOTP.Tooltip")</div>
+    <div class="coupon-code">
+        <input name="mobile" id="mobile" type="text" class="gift-card-coupon-code" aria-label="@T("ShoppingCart.TamayouzOTP.Label")" />
+
+        <button type="submit" name="sendOTP" id="sendOTP" class="button-2 apply-gift-card-coupon-code-button">@T("ShoppingCart.TamayouzOTP.Button")</button>
+    </div>
+</div>
+<script asp-location="Footer">
+    $(document).ready(function () {
+        $('#mobile').on('keydown', function (event) {
+            if (event.keyCode == 13) {
+                $('#sendOTP').trigger("click");
+                return false;
+            }
+        });
+    });
+</script>
