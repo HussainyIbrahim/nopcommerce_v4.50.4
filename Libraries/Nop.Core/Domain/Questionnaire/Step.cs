@@ -12,6 +12,7 @@
         //private ILazyLoader LazyLoader { get; set; }
 
         public string Title { get; set; }
+        public string ImageURL { get; set; }
         public int? YesId { get; set; }
         public int? NoId { get; set; }
         public virtual Step No { get; set; }

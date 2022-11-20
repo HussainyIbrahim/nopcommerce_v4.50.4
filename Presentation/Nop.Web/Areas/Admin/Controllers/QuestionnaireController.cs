@@ -10,6 +10,7 @@ using System.Linq;
 using Nop.Core.Domain.Questionnaire;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections;
+using Nop.Services.Localization;
 
 namespace Nop.Web.Areas.Admin.Controllers
 {
@@ -19,10 +20,15 @@ namespace Nop.Web.Areas.Admin.Controllers
     public class QuestionnaireController : BaseAdminController
     {
         public IQuestionnaireService QuestionnaireService { get; }
+        public ILocalizationService LocalizationService { get; }
 
-        public QuestionnaireController(IQuestionnaireService questionnaireService)
+        public QuestionnaireController(
+            IQuestionnaireService questionnaireService,
+            ILocalizationService localizationService
+            )
         {
             QuestionnaireService = questionnaireService;
+            LocalizationService = localizationService;
         }
         public virtual IActionResult Index()
         {
@@ -41,7 +47,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             }).ToList();
             model.ProductDDL.Insert(0, new SelectListItem
             {
-                Text = "Select Product",
+                Text = await LocalizationService.GetResourceAsync("Questionnaire.SelectProduct"),
                 Value = "0"
             });
             return View(model);
@@ -61,14 +67,14 @@ namespace Nop.Web.Areas.Admin.Controllers
         public async Task<IActionResult> GetErrorDDLByProductId(int productId)
         {
             var errors = await QuestionnaireService.GetErrorsByProductIdAsync(productId);
-            var errorsDDLModl = errors.Select(x=> new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            var errorsDDLModl = errors.Select(x=> new SelectListItem
             {
                 Value = x.Id.ToString(),
                 Text = x.Code,
             }).ToList();
             errorsDDLModl.Insert(0, new SelectListItem
             {
-                Text = "Select Product",
+                Text = await LocalizationService.GetResourceAsync("Questionnaire.SelectError"),
                 Value = "0"
             });
             return Ok(errorsDDLModl);
@@ -76,7 +82,9 @@ namespace Nop.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStepByErrorId(int errorId, int productId)
         {
-            return Ok(await QuestionnaireService.GetStepByErrorIdAsync(errorId, productId));
+            var step = await QuestionnaireService.GetStepByErrorIdAsync(errorId, productId);
+            var model = step.ToModel<StepModel>();
+            return Ok(model);
         }
     }
 }

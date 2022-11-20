@@ -18,12 +18,10 @@
             <nop-select asp-for="SelectedErrorId" asp-items="@Model.ErrorDDL" />
         </div>
     </div>
-    <div id="stepContent">
-        <div class="row">
-            <div class="col-12" id="title">
-            </div>
+    <div id="stepContent" class="row d-none">
+        <div class="col-12" id="title">
         </div>
-        <div id="optionsGroup" class="d-none">
+        <div id="optionsGroup" class="col-12 d-none">
             <div class="row">
                 <div class="col-6">
                     <input name="optionss" id="yes" type="radio" value="Yes">@T("Common.Yes")
@@ -32,7 +30,19 @@
                     <input name="optionss" id="no" type="radio" value="No">@T("Common.No")
                 </div>
             </div>
-            <button class="btn btn-success" id="showNextStep">@T("Forum.Submit")</button>
+            <div class="row">
+                <div class="col-12 d-none" id="imageSection">
+                    <img id="ImageURL" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="showPreviousStep" class="col-6 d-none">
+            <button class="btn btn-success">@T("Pager.Previous")</button>
+        </div>
+        <div id="showNextStep" class="col-6 d-none">
+            <button class="btn btn-success">@T("Pager.Next")</button>
         </div>
     </div>
 
@@ -42,6 +52,7 @@
         var yesStepId = 0;
         var noStepId = 0;
         var nextStepId = 0;
+        var perviousStepId = 0;
         $('#@Html.IdFor(model => model.SelectedProductId)').change(function () {
             $('#erroSection').addClass('d-none');
             $('#stepContent').addClass('d-none');
@@ -81,15 +92,25 @@
                     'errorId': selectedItem
                 },
                 success: function (data, textStatus, jqXHR) {
-                    $('#stepContent').removeClass('d-none');
-                    $('#title').text(data.Title)
-                    $("input:radio").prop('checked', false);
-                    if (data.YesId == null && data.NoId == null) {
-                        $('#optionsGroup').addClass('d-none');
+                    if (data == null) {
+                        $('#stepContent').addClass('d-none');
                     } else {
-                        yesStepId = data.YesId;
-                        noStepId = data.NoId;
-                        $('#optionsGroup').removeClass('d-none');
+                        if (data.YesImageURL !== null) {
+                            $('#ImageURL').attr("src", data.ImageURL);
+                            $('#imageSection').removeClass("d-none");
+                        }
+                        $('#stepContent').removeClass('d-none');
+                        $('#title').text(data.Title)
+                        $("input:radio").prop('checked', false);
+                        if (data.YesId == null && data.NoId == null) {
+                            $('#optionsGroup').addClass('d-none');
+                            $('#showNextStep').addClass('d-none');
+                        } else {
+                            yesStepId = data.YesId;
+                            noStepId = data.NoId;
+                            $('#optionsGroup').removeClass('d-none');
+                            $('#showNextStep').removeClass('d-none');
+                        }
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -123,6 +144,7 @@
                         $("input:radio").prop('checked', false);
                         if (data.YesId == null && data.NoId == null) {
                             $('#optionsGroup').addClass('d-none');
+                            $('#showNextStep').addClass('d-none');
                         } else {
                             yesStepId = data.YesId;
                             noStepId = data.NoId;
@@ -133,6 +155,34 @@
             } else {
                 alert('must select yes or no');
             }
+        });
+        $('#showPreviousStep').bind('click', function () {
+            var postData = {
+                stepId: perviousStepId
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                cache: false,
+                url: "@Url.Action("GetStepById", "Questionnaire")",
+                type: "POST",
+                data: postData,
+                dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(JSON.stringify(jqXHR));
+                },
+                success: function (data, textStatus, jqXHR) {
+                    $('#title').text(data.Title);
+                    $("input:radio").prop('checked', false);
+                    perviousStepId = data.Id;
+                    alert("next =" + nextStepId + ", perv =" + perviousStepId)
+                    if (perviousStepId == nextStepId) {
+                        $('#showPreviousStep').addClass('d-none');
+                    }
+                    if (data.YesId !== null) {
+                        $('#showNextStep').removeClass('d-none');
+                    }
+                }
+            });
         });
     });
 </script>
