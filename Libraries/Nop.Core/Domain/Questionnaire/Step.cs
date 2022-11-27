@@ -20,7 +20,7 @@
 
         //public virtual Step No { get => LazyLoader.Load(this, ref _no); set => _no = value; }
         //public virtual Step Yes { get => LazyLoader.Load(this, ref _yes); set => _yes = value; }
-        //public virtual Step InverseNo { get; set; }
-        //public virtual Step InverseYes { get; set; }
+        public virtual Step InverseNo { get; set; }
+        public virtual Step InverseYes { get; set; }
     }
 }

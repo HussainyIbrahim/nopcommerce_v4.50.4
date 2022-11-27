@@ -47,6 +47,7 @@ using Nop.Services.Seo;
 using Nop.Services.Shipping;
 using Nop.Services.Shipping.Date;
 using Nop.Services.Shipping.Pickup;
+using Nop.Services.Steps;
 using Nop.Services.Stores;
 using Nop.Services.Tax;
 using Nop.Services.Themes;
@@ -113,6 +114,7 @@ namespace Nop.Web.Framework.Infrastructure
 
             //services
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
+            services.AddScoped<IStepService, StepService>();
             services.AddScoped<IBackInStockSubscriptionService, BackInStockSubscriptionService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICompareProductsService, CompareProductsService>();

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Nop.Core.Configuration;
 using Nop.Core.Domain.Affiliates;
 using Nop.Core.Domain.Blogs;
@@ -59,6 +60,7 @@ using Nop.Web.Areas.Admin.Models.Questionnaire;
 using Nop.Web.Areas.Admin.Models.Settings;
 using Nop.Web.Areas.Admin.Models.Shipping;
 using Nop.Web.Areas.Admin.Models.ShoppingCart;
+using Nop.Web.Areas.Admin.Models.Step;
 using Nop.Web.Areas.Admin.Models.Stores;
 using Nop.Web.Areas.Admin.Models.Tasks;
 using Nop.Web.Areas.Admin.Models.Tax;
@@ -67,6 +69,8 @@ using Nop.Web.Areas.Admin.Models.Topics;
 using Nop.Web.Areas.Admin.Models.Vendors;
 using Nop.Web.Framework.Configuration;
 using Nop.Web.Framework.Models;
+using System;
+using System.IO;
 
 namespace Nop.Web.Areas.Admin.Infrastructure.Mapper
 {
@@ -76,7 +80,7 @@ namespace Nop.Web.Areas.Admin.Infrastructure.Mapper
     public class AdminMapperConfiguration : Profile, IOrderedMapperProfile
     {
         #region Ctor
-
+       
         public AdminMapperConfiguration()
         {
             //create specific maps
@@ -185,9 +189,11 @@ namespace Nop.Web.Areas.Admin.Infrastructure.Mapper
         /// <summary>
         /// Create step maps 
         /// </summary>
-        protected virtual void CreateStepMaps() 
+        protected virtual void CreateStepMaps()
         {
-            CreateMap<StepModel, Step>().ReverseMap();
+            CreateMap<Models.Questionnaire.StepModel, Step>().ReverseMap();
+            CreateMap<Step, Nop.Web.Areas.Admin.Models.Step.StepModel>()
+                .ReverseMap();
         }
         /// <summary>
         /// Create configuration maps 

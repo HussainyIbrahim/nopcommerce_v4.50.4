@@ -31,6 +31,7 @@ namespace Nop.Web.Infrastructure
             services.AddScoped<IStoreMappingSupportedModelFactory, StoreMappingSupportedModelFactory>();
 
             //admin factories
+            services.AddScoped<IStepModelFactory, StepModelFactory>();
             services.AddScoped<IBaseAdminModelFactory, BaseAdminModelFactory>();
             services.AddScoped<IActivityLogModelFactory, ActivityLogModelFactory>();
             services.AddScoped<IAddressModelFactory, AddressModelFactory>();

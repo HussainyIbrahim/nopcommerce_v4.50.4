@@ -1,0 +1,183 @@
+﻿@using Nop.Web.Areas.Admin.Models.Step
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model StepCreateEditModel
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Steps").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Steps");
+}
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Admin.Configuration.Steps.Edit")
+        <small>
+            <i class="fas fa-arrow-circle-left"></i>
+            <a asp-action="List">@T("Admin.Configuration.Steps.BackToList")</a>
+        </small>
+    </h1>
+    <div class="float-right">
+        <button type="button" name="save" class="btn btn-primary">
+            <i class="far fa-save"></i>
+            @T("Admin.Common.Save")
+        </button>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="Title" />
+                </div>
+                <div class="col-md-9">
+                    <input asp-for="Title" asp-required="true" type="text" />
+                    <span asp-validation-for="Title"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedYesStepId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="SelectedYesStepId" asp-items="@Model.YesDDL" />
+                    <span asp-validation-for="SelectedYesStepId"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedNoStepId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="SelectedNoStepId" asp-items="@Model.NoDDL" />
+                    <span asp-validation-for="SelectedNoStepId"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="@Model.PictureId" />
+                </div>
+                <div class="col-md-9">
+                    <input asp-for="@Model.PictureId" type="file" id="fileUploader" />
+                    <span asp-validation-for="@Model.PictureId"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                    <button id="saveStep" type="button" class="btn btn-primary">@T("Forum.Submit")</button>
+                    <input name="__RequestVerificationToken" type="hidden" value="P5g2D8vRyE3aBn7qQKfVVVAsQc853s-naENvpUAPZLipuw0pa_ffBf9cINzFgIRPwsf7Ykjt46ttJy5ox5r3mzpqvmgNYdnKc1125jphQV0NnM5nGFtcXXqoY3RpusTH_WcHPzH4S4l1PmB8Uu7ubZBftqFdxCLC5n-xT0fHcAY1" />
+                    <input name="changeYes" type="hidden" value="false" />
+                    <input name="changeNo" type="hidden" value="false" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+        var changeYesId = false;
+        var changeNoId = false;
+        $('[name=save]').click(function () {
+            $("#saveStep").click();
+            return false;
+        });
+        $('#@Html.IdFor(model => model.SelectedYesStepId)').change(function () {
+            var selectedItem = parseInt($(this).val());
+            var postData = {
+                id: selectedItem,
+                stepId: @Model.Id
+            };
+            if (selectedItem !== 0) {
+                addAntiForgeryToken(postData);
+                $.ajax({
+                    cache: false,
+                    url: "@Url.Action("CheckIfStepIsUsed", "Step")",
+                    type: "POST",
+                    data: postData,
+                    dataType: "json",
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(JSON.stringify(jqXHR));
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        $('[name=changeYes]').val(data.IsUsed);
+                        if (data.IsUsed)
+                            alert($('#@Html.IdFor(model => model.SelectedYesStepId)').find("option:selected").text() + ' is chiled of other step and if you used it, it will be deleted from other step? or you can select another step');
+                    }
+                });
+            }
+        });
+        $('#@Html.IdFor(model => model.SelectedNoStepId)').change(function () {
+            var selectedItem = parseInt($(this).val());
+            var postData = {
+                id: selectedItem,
+                stepId: @Model.Id
+            };
+            alert(selectedItem);
+            if (selectedItem != 0) {
+                addAntiForgeryToken(postData);
+                $.ajax({
+                    cache: false,
+                    url: "@Url.Action("CheckIfStepIsUsed", "Step")",
+                    type: "POST",
+                    data: postData,
+                    dataType: "json",
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(JSON.stringify(jqXHR));
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        $('[name=changeNo]').val(data.IsUsed);
+                        changeNoId = data.IsUsed;
+                        if (data.IsUsed)
+                            alert($('#@Html.IdFor(model => model.SelectedNoStepId)').find("option:selected").text() + ' is chiled of other step and if you used it, it will be deleted from other step? or you can select another step');
+                    }
+                });
+            }
+        });
+        $("#saveStep").click(function () {
+            var selectedYesId = parseInt($('#@Html.IdFor(model => model.SelectedYesStepId)').val());
+            var selectedNoId = parseInt($('#@Html.IdFor(model => model.SelectedNoStepId)').val());
+            if (selectedNoId == selectedYesId && selectedNoId != 0 && selectedYesId != 0) {
+                alert("error")
+                return;
+            }
+            var fileUpload = $("#fileUploader").get(0);
+            if (fileUpload != undefined) {
+                var file = fileUpload.files[0];
+                // Create FormData object
+                var fileData = new FormData();
+                fileData.append("image", file);
+            }
+            fileData.append("title", $('#@Html.IdFor(model => model.Title)').val());
+            fileData.append("changeNoId", $('[name=changeNo]').val());
+            fileData.append("changeYesId", $('[name=changeYes]').val());
+            fileData.append("id", @Model.Id);
+            fileData.append("yesId", parseInt($('#@Html.IdFor(model => model.SelectedYesStepId)').val()));
+            fileData.append("noId", parseInt($('#@Html.IdFor(model => model.SelectedNoStepId)').val()));
+            fileData.append('__RequestVerificationToken', $('[name=__RequestVerificationToken]').val());
+            $.ajax({
+                cache: false,
+                url: "@Url.Action("Edit", "Step")",
+                type: "POST",
+                data: fileData,
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                //dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(JSON.stringify(jqXHR));
+                },
+                success: function (data, textStatus, jqXHR) {
+                    if (data) {
+                        window.location.href = "/admin/step/list";
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+
