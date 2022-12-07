@@ -9,7 +9,47 @@
     //active menu item (system name)
     NopHtml.SetActiveMenuItemSystemName("Steps");
 }
-<div class="content-wrapper">
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedProductId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="SelectedProductId" asp-items="@Model.ProductDDL" />
+                    <span asp-validation-for="SelectedProductId"></span>
+                </div>
+            </div>
+            <div class="form-group row d-none" id="erroSection">
+                <div class="col-md-3">
+                    <nop-label asp-for="SelectedErrorId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="SelectedErrorId" asp-items="@Model.ErrorDDL" />
+                    <span asp-validation-for="SelectedErrorId"></span>
+                </div>
+            </div>
+            <div class="form-group row d-none" id="stepContent">
+                <div class="col-12" id="title"></div>
+                <div class="col-12 d-none" id="optionsGroup">
+                    <div class="row">
+                        <div class="col-6">
+                            <input name="optionss" id="yes" type="radio" value="Yes">@T("Common.Yes")
+                        </div>
+                        <div class="col-6">
+                            <input name="optionss" id="no" type="radio" value="No">@T("Common.No")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row d-none" id="showNextStep">
+                <button class="btn btn-success">@T("Pager.Next")</button>
+            </div>
+        </div>
+    </div>
+</section>
+@*<div class="content-wrapper">
     <div class="row">
         <div class="col-6">
             <nop-select asp-for="SelectedProductId" asp-items="@Model.ProductDDL" />
@@ -38,15 +78,12 @@
         </div>
     </div>
     <div class="row">
-        <div id="showPreviousStep" class="col-6 d-none">
-            <button class="btn btn-success">@T("Pager.Previous")</button>
-        </div>
-        <div id="showNextStep" class="col-6 d-none">
+        <div id="showNextStep" class="col-12 d-none">
             <button class="btn btn-success">@T("Pager.Next")</button>
         </div>
     </div>
 
-</div>
+</div>*@
 <script>
     $(document).ready(function () {
         var yesStepId = 0;
@@ -68,10 +105,10 @@
                 success: function (data, textStatus, jqXHR) {
                     ddlError.html('');
                     if (data.length > 1) {
-                        $('#erroSection').removeClass('d-none');
                         $.each(data, function (id, option) {
                             ddlError.append($('<option></option>').val(option.Value).html(option.Text));
                         });
+                        $('#erroSection').removeClass('d-none');
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -81,6 +118,7 @@
         });
         $('#@Html.IdFor(model => model.SelectedErrorId)').change(function () {
             $('#stepContent').addClass('d-none');
+            $('#showNextStep').addClass('d-none');
             var selectedItem = parseInt($(this).val());
             var productId = parseInt($('#@Html.IdFor(model => model.SelectedProductId)').val());
             $.ajax({
@@ -88,8 +126,7 @@
                 type: 'GET',
                 url: '@(Url.Action("GetStepByErrorId", "Questionnaire"))',
                 data: {
-                    'productId': productId,
-                    'errorId': selectedItem
+                    'producterrorStepId': selectedItem
                 },
                 success: function (data, textStatus, jqXHR) {
                     if (data == null) {
@@ -102,7 +139,7 @@
                         $('#stepContent').removeClass('d-none');
                         $('#title').text(data.Title)
                         $("input:radio").prop('checked', false);
-                        if (data.YesId == null && data.NoId == null) {
+                        if (data.YesId == null || data.NoId == null) {
                             $('#optionsGroup').addClass('d-none');
                             $('#showNextStep').addClass('d-none');
                         } else {

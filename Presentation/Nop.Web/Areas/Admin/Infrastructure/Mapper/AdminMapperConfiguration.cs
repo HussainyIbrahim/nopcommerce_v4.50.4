@@ -45,6 +45,7 @@ using Nop.Web.Areas.Admin.Models.Common;
 using Nop.Web.Areas.Admin.Models.Customers;
 using Nop.Web.Areas.Admin.Models.Directory;
 using Nop.Web.Areas.Admin.Models.Discounts;
+using Nop.Web.Areas.Admin.Models.Error;
 using Nop.Web.Areas.Admin.Models.ExternalAuthentication;
 using Nop.Web.Areas.Admin.Models.Forums;
 using Nop.Web.Areas.Admin.Models.Localization;
@@ -56,6 +57,7 @@ using Nop.Web.Areas.Admin.Models.Orders;
 using Nop.Web.Areas.Admin.Models.Payments;
 using Nop.Web.Areas.Admin.Models.Plugins;
 using Nop.Web.Areas.Admin.Models.Polls;
+using Nop.Web.Areas.Admin.Models.Product;
 using Nop.Web.Areas.Admin.Models.Questionnaire;
 using Nop.Web.Areas.Admin.Models.Settings;
 using Nop.Web.Areas.Admin.Models.Shipping;
@@ -80,11 +82,13 @@ namespace Nop.Web.Areas.Admin.Infrastructure.Mapper
     public class AdminMapperConfiguration : Profile, IOrderedMapperProfile
     {
         #region Ctor
-       
+
         public AdminMapperConfiguration()
         {
             //create specific maps
+            CreateTroubleShootingProductMaps();
             CreateStepMaps();
+            CreateErrorMaps();
             CreateConfigMaps();
             CreateAffiliatesMaps();
             CreateAuthenticationMaps();
@@ -185,7 +189,20 @@ namespace Nop.Web.Areas.Admin.Infrastructure.Mapper
         #endregion
 
         #region Utilities
-
+        /// <summary>
+        /// Create TroubleShootingProduct Maps
+        /// </summary>
+        protected virtual void CreateTroubleShootingProductMaps()
+        {
+            CreateMap<QuestionnaireProduct, TroubleShootingProductModel>().ReverseMap();
+        }
+        /// <summary>
+        /// Create error maps
+        /// </summary>
+        protected virtual void CreateErrorMaps()
+        {
+            CreateMap<Error, ErrorModel>().ReverseMap();
+        }
         /// <summary>
         /// Create step maps 
         /// </summary>

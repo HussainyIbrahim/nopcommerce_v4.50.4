@@ -4,7 +4,7 @@
     {
         public int QuestionnaireProductErrorId { get; set; }
         public int StepId { get; set; }
-        public virtual QuestionnaireProductError ProductError { get; set; }
+        public virtual QuestionnaireProductError QuestionnaireProductError { get; set; }
         public virtual Step Step { get; set; }
     }
 }

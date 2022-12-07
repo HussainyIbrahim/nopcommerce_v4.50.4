@@ -22,6 +22,7 @@ using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Discounts;
+using Nop.Services.Errors;
 using Nop.Services.Events;
 using Nop.Services.ExportImport;
 using Nop.Services.Forums;
@@ -52,6 +53,7 @@ using Nop.Services.Stores;
 using Nop.Services.Tax;
 using Nop.Services.Themes;
 using Nop.Services.Topics;
+using Nop.Services.TroubleShootingProduct;
 using Nop.Services.Vendors;
 using Nop.Web.Framework.Menu;
 using Nop.Web.Framework.Mvc.Routing;
@@ -115,6 +117,8 @@ namespace Nop.Web.Framework.Infrastructure
             //services
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
             services.AddScoped<IStepService, StepService>();
+            services.AddScoped<IErrorService, ErrorService>();
+            services.AddScoped<ITroubleShootingProductService, TroubleShootingProductService>();
             services.AddScoped<IBackInStockSubscriptionService, BackInStockSubscriptionService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICompareProductsService, CompareProductsService>();

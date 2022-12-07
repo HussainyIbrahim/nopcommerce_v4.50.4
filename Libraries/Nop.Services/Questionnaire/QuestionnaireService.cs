@@ -12,34 +12,24 @@ namespace Nop.Services.Questionnaire
             IRepository<Step> stepRepo,
             IRepository<QuestionnaireProduct> questionnaireProductRepo,
             IRepository<Error> errorRepo,
-            IRepository<QuestionnaireProductError> questionnaireProductErrorRepo,
-            IRepository<QuestionnaireProductErrorStep> questionnaireProductErrorStepRepo
+            IRepository<QuestionnaireProductError> questionnaireProductErrorRepo
             )
         {
             StepRepo = stepRepo;
             QuestionnaireProductRepo = questionnaireProductRepo;
             ErrorRepo = errorRepo;
             QuestionnaireProductErrorRepo = questionnaireProductErrorRepo;
-            QuestionnaireProductErrorStepRepo = questionnaireProductErrorStepRepo;
         }
 
         public IRepository<Step> StepRepo { get; }
         public IRepository<QuestionnaireProduct> QuestionnaireProductRepo { get; }
         public IRepository<Error> ErrorRepo { get; }
         public IRepository<QuestionnaireProductError> QuestionnaireProductErrorRepo { get; }
-        public IRepository<QuestionnaireProductErrorStep> QuestionnaireProductErrorStepRepo { get; }
 
-        public async Task<List<Error>> GetErrorsByProductIdAsync(int productId)
+        public async Task<List<QuestionnaireProductError>> GetErrorsByProductIdAsync(int productId)
         {
-            var errors = await ErrorRepo.GetAllAsync(query =>
-            {
-                query = from error in query
-                        join productError in QuestionnaireProductErrorRepo.Table on error.Id equals productError.ErrorId
-                        where productError.QuestionnaireProductId == productId
-                        select error;
-                return query;
-            });
-            return await errors.ToListAsync();
+            var errors = await QuestionnaireProductErrorRepo.Table.Where(x => x.QuestionnaireProductId == productId).ToListAsync();
+            return errors;
         }
 
         public async Task<List<QuestionnaireProduct>> GetQuestionnaireProductsDDL()
@@ -48,14 +38,13 @@ namespace Nop.Services.Questionnaire
             return await products.ToListAsync();
         }
 
-        public async Task<Step> GetStepByErrorIdAsync(int errorId, int productId)
+        public async Task<Step> GetStepByErrorIdAsync(int producterrorStepId)
         {
             var stepDB = await StepRepo.GetAllAsync(query =>
             {
                 query = from productError in QuestionnaireProductErrorRepo.Table
-                        join productErrorStep in QuestionnaireProductErrorStepRepo.Table on productError.Id equals productErrorStep.QuestionnaireProductErrorId
-                        join step in StepRepo.Table on productErrorStep.StepId equals step.Id
-                        where productError.ErrorId == errorId && productError.QuestionnaireProductId == productId
+                        join step in StepRepo.Table on productError.StepId equals step.Id
+                        where productError.Id == producterrorStepId
                         select step;
                 return query;
             });

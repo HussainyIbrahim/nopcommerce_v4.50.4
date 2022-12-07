@@ -1,0 +1,76 @@
+﻿@using Nop.Web.Areas.Admin.Models.Error
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model ErrorModel
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Catalog.Errors").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Errors");
+}
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Admin.Catalog.Errors.AddNew")
+        <small>
+            <i class="fas fa-arrow-circle-left"></i>
+            <a asp-action="List">@T("Admin.Catalog.Errors.BackToList")</a>
+        </small>
+    </h1>
+    <div class="float-right">
+        <button type="button" name="save" class="btn btn-primary">
+            <i class="far fa-save"></i>
+            @T("Admin.Common.Save")
+        </button>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="Code" />
+                </div>
+                <div class="col-md-9">
+                    <input asp-for="Code" asp-required="true" type="text" />
+                    <span asp-validation-for="Code"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-9">
+                    <button id="saveError" type="button" class="btn btn-primary">@T("Forum.Submit")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('[name=save]').click(function () {
+            $("#saveError").click();
+            return false;
+        });
+        $('#saveError').click(function () {
+            var postData = {
+                id:@Model.Id,
+                code: $('#@Html.IdFor(model => model.Code)').val()
+            }
+            addAntiForgeryToken(postData);
+            $.ajax({
+                cache: false,
+                url: "@Url.Action("Edit", "Error")",
+                type: "POST",
+                data: postData,
+                dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(JSON.stringify(jqXHR));
+                },
+                success: function (data, textStatus, jqXHR) {
+                    window.location.href = '/Admin/Error/List';
+                }
+            });
+        });
+    });
+</script>
